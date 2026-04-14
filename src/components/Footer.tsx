@@ -121,8 +121,17 @@ const Footer: React.FC<FooterProps> = ({ onLegalClick, onInfoClick }) => {
                 </a>
               </li>
               <li className="flex items-start space-x-3">
-                <span className="text-blue-500 italic">✉️</span>
-                <span>Silviakarinafuentesromero3@gmail.com</span>
+                <a
+                  href="https://mail.google.com/mail/?view=cm&to=Silviakarinafuentesromero3@gmail.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start space-x-3 hover:text-white transition-colors group"
+                >
+                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z" fill="#EA4335"/>
+                  </svg>
+                  <span className="group-hover:text-white">Silviakarinafuentesromero3@gmail.com</span>
+                </a>
               </li>
             </ul>
           </div>
