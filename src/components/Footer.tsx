@@ -100,7 +100,14 @@ const Footer: React.FC<FooterProps> = ({ onLegalClick, onInfoClick }) => {
             <ul className="space-y-4 text-sm">
               <li className="flex items-start space-x-3">
                 <span className="text-blue-500 italic">📍</span>
-                <span>Av Manuel seoane 259, Chepén, Chepén, Perú</span>
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=Av+Manuel+Seoane+259+Chep%C3%A9n+Per%C3%BA"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-blue-400 transition-colors"
+                >
+                  Av Manuel Seoane 259, Chepén, Chepén, Perú
+                </a>
               </li>
               <li className="flex items-start space-x-3">
                 <span className="text-blue-500 italic">📞</span>
