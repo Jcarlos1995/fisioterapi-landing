@@ -7,6 +7,7 @@ import Professionals from './components/Professionals';
 import Footer from './components/Footer';
 import LoginModal from './components/LoginModal';
 import LegalModal, { LegalType } from './components/LegalModal';
+import InfoModal, { InfoType } from './components/InfoModal';
 import { ChatAssistant } from './components/ChatAssistant';
 import { LoginType } from './types';
 
@@ -16,6 +17,9 @@ const App: React.FC = () => {
 
   // Estado del modal legal
   const [legalModalType, setLegalModalType] = useState<LegalType | null>(null);
+
+  // Estado del modal informativo
+  const [infoModalType, setInfoModalType] = useState<InfoType | null>(null);
 
   // URL del sistema de agendamiento
   const BOOKING_URL = "https://fisiosystem-8c492.web.app/#/agendar";
@@ -73,7 +77,10 @@ const App: React.FC = () => {
         </section>
       </main>
 
-      <Footer onLegalClick={(type) => setLegalModalType(type)} />
+      <Footer
+        onLegalClick={(type) => setLegalModalType(type)}
+        onInfoClick={(type) => setInfoModalType(type)}
+      />
 
       <LoginModal
         isOpen={isLoginModalOpen}
@@ -86,6 +93,13 @@ const App: React.FC = () => {
         isOpen={legalModalType !== null}
         onClose={() => setLegalModalType(null)}
         type={legalModalType ?? 'privacidad'}
+      />
+
+      {/* Modal Informativo */}
+      <InfoModal
+        isOpen={infoModalType !== null}
+        onClose={() => setInfoModalType(null)}
+        type={infoModalType ?? 'contacto'}
       />
 
       <ChatAssistant />

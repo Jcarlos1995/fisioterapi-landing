@@ -1,12 +1,18 @@
 
 import React from 'react';
 import { LegalType } from './LegalModal';
+import { InfoType } from './InfoModal';
 
 interface FooterProps {
   onLegalClick: (type: LegalType) => void;
+  onInfoClick: (type: InfoType) => void;
 }
 
-const Footer: React.FC<FooterProps> = ({ onLegalClick }) => {
+const scrollTo = (id: string) => {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+};
+
+const Footer: React.FC<FooterProps> = ({ onLegalClick, onInfoClick }) => {
   return (
     <footer className="bg-slate-900 text-slate-400 py-12">
       <div className="container mx-auto px-4">
@@ -24,10 +30,38 @@ const Footer: React.FC<FooterProps> = ({ onLegalClick }) => {
           <div>
             <h4 className="text-white font-bold mb-6">Enlaces</h4>
             <ul className="space-y-4 text-sm">
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Sobre Nosotros</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Servicios de Fisioterapia</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Especialistas</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Contacto</a></li>
+              <li>
+                <button
+                  onClick={() => onInfoClick('sobre-nosotros')}
+                  className="hover:text-blue-400 transition-colors text-left"
+                >
+                  Sobre Nosotros
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onInfoClick('servicios')}
+                  className="hover:text-blue-400 transition-colors text-left"
+                >
+                  Servicios de Fisioterapia
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => scrollTo('profesionales')}
+                  className="hover:text-blue-400 transition-colors text-left"
+                >
+                  Especialistas
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onInfoClick('contacto')}
+                  className="hover:text-blue-400 transition-colors text-left"
+                >
+                  Contacto
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -61,7 +95,7 @@ const Footer: React.FC<FooterProps> = ({ onLegalClick }) => {
             </ul>
           </div>
 
-          <div>
+          <div id="contacto">
             <h4 className="text-white font-bold mb-6">Contacto</h4>
             <ul className="space-y-4 text-sm">
               <li className="flex items-start space-x-3">
