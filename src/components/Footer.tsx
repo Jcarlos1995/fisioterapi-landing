@@ -104,7 +104,14 @@ const Footer: React.FC<FooterProps> = ({ onLegalClick, onInfoClick }) => {
               </li>
               <li className="flex items-start space-x-3">
                 <span className="text-blue-500 italic">📞</span>
-                <span>+51 926 798 464</span>
+                <a
+                  href="https://wa.me/51926798464"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-green-400 transition-colors"
+                >
+                  +51 926 798 464
+                </a>
               </li>
               <li className="flex items-start space-x-3">
                 <span className="text-blue-500 italic">✉️</span>
