@@ -2,16 +2,20 @@ import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 // Importamos el componente Stories que tiene la lógica de Firebase y Carrusel
-import Stories from './components/Stories'; 
+import Stories from './components/Stories';
 import Professionals from './components/Professionals';
 import Footer from './components/Footer';
 import LoginModal from './components/LoginModal';
+import LegalModal, { LegalType } from './components/LegalModal';
 import { ChatAssistant } from './components/ChatAssistant';
 import { LoginType } from './types';
 
 const App: React.FC = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [selectedLoginType, setSelectedLoginType] = useState<LoginType>(LoginType.CLIENT);
+
+  // Estado del modal legal
+  const [legalModalType, setLegalModalType] = useState<LegalType | null>(null);
 
   // URL del sistema de agendamiento
   const BOOKING_URL = "https://fisiosystem-8c492.web.app/#/agendar";
@@ -25,10 +29,10 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col scroll-smooth">
       {/* El Navbar ahora maneja el enlace directo a agendar */}
       <Navbar onLoginClick={openLogin} />
-      
+
       <main className="flex-grow">
         <Hero />
-        
+
         <section id="profesionales" className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-slate-800">
@@ -46,7 +50,7 @@ const App: React.FC = () => {
               Historias que Inspiran
             </h2>
           </div>
-          
+
           {/* El componente Stories ahora se expande para permitir el scroll lateral libre */}
           <div className="max-w-[1600px] mx-auto overflow-visible">
             <Stories />
@@ -59,7 +63,7 @@ const App: React.FC = () => {
             <p className="text-xl mb-8 opacity-90">
               Únete a los cientos de pacientes que han confiado su salud en nuestras manos.
             </p>
-            <a 
+            <a
               href={BOOKING_URL}
               className="inline-block bg-white text-blue-600 px-8 py-4 rounded-full font-bold hover:bg-slate-100 transition-all shadow-xl hover:-translate-y-1 active:scale-95"
             >
@@ -69,12 +73,19 @@ const App: React.FC = () => {
         </section>
       </main>
 
-      <Footer />
+      <Footer onLegalClick={(type) => setLegalModalType(type)} />
 
-      <LoginModal 
-        isOpen={isLoginModalOpen} 
-        onClose={() => setIsLoginModalOpen(false)} 
-        type={selectedLoginType} 
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        type={selectedLoginType}
+      />
+
+      {/* Modal Legal */}
+      <LegalModal
+        isOpen={legalModalType !== null}
+        onClose={() => setLegalModalType(null)}
+        type={legalModalType ?? 'privacidad'}
       />
 
       <ChatAssistant />

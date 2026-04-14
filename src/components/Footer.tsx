@@ -1,7 +1,12 @@
 
 import React from 'react';
+import { LegalType } from './LegalModal';
 
-const Footer: React.FC = () => {
+interface FooterProps {
+  onLegalClick: (type: LegalType) => void;
+}
+
+const Footer: React.FC<FooterProps> = ({ onLegalClick }) => {
   return (
     <footer className="bg-slate-900 text-slate-400 py-12">
       <div className="container mx-auto px-4">
@@ -15,7 +20,7 @@ const Footer: React.FC = () => {
               Dedicados a la rehabilitación física y el bienestar integral con los más altos estándares de calidad en Chepén.
             </p>
           </div>
-          
+
           <div>
             <h4 className="text-white font-bold mb-6">Enlaces</h4>
             <ul className="space-y-4 text-sm">
@@ -29,9 +34,30 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="text-white font-bold mb-6">Legal</h4>
             <ul className="space-y-4 text-sm">
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Privacidad</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Términos de Uso</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Cookies</a></li>
+              <li>
+                <button
+                  onClick={() => onLegalClick('privacidad')}
+                  className="hover:text-blue-400 transition-colors text-left"
+                >
+                  Privacidad
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onLegalClick('terminos')}
+                  className="hover:text-blue-400 transition-colors text-left"
+                >
+                  Términos de Uso
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onLegalClick('cookies')}
+                  className="hover:text-blue-400 transition-colors text-left"
+                >
+                  Cookies
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -53,7 +79,7 @@ const Footer: React.FC = () => {
             </ul>
           </div>
         </div>
-        
+
         <div className="pt-8 border-t border-slate-800 text-center text-xs">
           <p>© {new Date().getFullYear()} Fisioterapi Chepén. Todos los derechos reservados.</p>
         </div>
@@ -63,3 +89,4 @@ const Footer: React.FC = () => {
 };
 
 export default Footer;
+

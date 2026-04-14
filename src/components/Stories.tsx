@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { db } from '../firebaseConfig'; 
+import { db } from '../firebaseConfig';
 import { collection, getDocs, query } from 'firebase/firestore';
 import { HeartPulse, Loader2, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
-import casoJuanImg from '../assets/stories/caso-Juan.jpg';
-import casoSegundoImg from '../assets/stories/caso-segundo.jpg';
 
 interface ClinicStory {
   id?: string;
@@ -14,7 +12,10 @@ interface ClinicStory {
   imageUrl?: string;
 }
 
-// Historias por defecto cuando Firestore está vacío o falla la carga
+// Placeholder Base64 mínimo (1x1 gris) para historias fijas — no depende de archivos
+const FALLBACK_IMAGE_PLACEHOLDER = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgNDAwIDMwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YxZjVmOSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTRhM2JmIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCI+U2luIGltYWdlbjwvdGV4dD48L3N2Zz4=';
+
+// Historias FIJAS cuando Firestore está vacío o falla la carga (siempre disponibles, sin archivos)
 const DEFAULT_STORIES: ClinicStory[] = [
   {
     id: 'fallback-1',
@@ -22,7 +23,7 @@ const DEFAULT_STORIES: ClinicStory[] = [
     diagnosis: 'Recuperación tras paraplejia por hernia dorsal',
     testimony: 'Recuperé el 100% de movilidad gracias al equipo de Fisioterapia Chepén. Un proceso largo pero con resultados que superaron mis expectativas.',
     displayDate: '2024-08',
-    imageUrl: casoJuanImg,
+    imageUrl: FALLBACK_IMAGE_PLACEHOLDER,
   },
   {
     id: 'fallback-2',
@@ -30,7 +31,7 @@ const DEFAULT_STORIES: ClinicStory[] = [
     diagnosis: 'Recuperación post ACV',
     testimony: 'En dos meses recuperé alrededor del 90% de mi movilidad después del ACV. El trato profesional y el plan de rehabilitación marcaron la diferencia.',
     displayDate: '2024-06',
-    imageUrl: casoSegundoImg,
+    imageUrl: FALLBACK_IMAGE_PLACEHOLDER,
   },
 ];
 
@@ -117,9 +118,14 @@ const Stories: React.FC = () => {
               {story.imageUrl && story.imageUrl.trim() !== "" ? (
                 <img 
                   loading="lazy"
-                  src={story.imageUrl} 
-                  alt={story.patientName} 
+                  src={story.imageUrl}
+                  alt={story.patientName}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  onError={(e) => {
+                    const el = e.target as HTMLImageElement;
+                    el.onerror = null;
+                    el.src = FALLBACK_IMAGE_PLACEHOLDER;
+                  }}
                 />
               ) : (
                 <div className="flex flex-col items-center gap-2">
