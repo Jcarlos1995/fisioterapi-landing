@@ -12,22 +12,6 @@ export interface Professional {
   bio: string;
 }
 
-export interface ClinicStory {
-  id: string;
-  title: string;
-  patientName: string;
-  summary: string;
-  treatment: string;
-  image: string;
-  date: string;
-}
-
-export enum LoginType {
-  CLIENT = 'CLIENT',
-  PROFESSIONAL = 'PROFESSIONAL'
-}
-
-// types.ts (en la carpeta de tu Landing)
 export interface Story {
   id?: string;
   patientName: string;

@@ -1,4 +1,5 @@
 import React from 'react';
+import { BOOKING_URL } from '../config';
 import { X, HeartPulse, Users, Dumbbell, Brain, Stethoscope, Sparkles, MapPin, Phone, Mail, Clock } from 'lucide-react';
 
 export type InfoType = 'sobre-nosotros' | 'servicios' | 'contacto';
@@ -107,7 +108,7 @@ const SOBRE_NOSOTROS = (
       </div>
       <div className="flex items-start gap-3 text-slate-300 text-xs">
         <Clock size={15} className="text-blue-400 flex-shrink-0 mt-0.5" />
-        <span>Lunes a Sábado: 8:00 am – 7:00 pm</span>
+        <span>Lunes a Viernes: 8:00 am – 7:00 pm · Sábado: 8:00 am – 1:00 pm</span>
       </div>
     </section>
   </div>
@@ -204,7 +205,7 @@ const SERVICIOS = (
         Contáctanos y nuestro equipo te orientará sobre el tratamiento más adecuado para ti.
       </p>
       <a
-        href="https://fisiosystem-8c492.web.app/#/agendar"
+        href={BOOKING_URL}
         className="inline-block bg-white text-blue-600 font-bold text-xs px-5 py-2.5 rounded-full hover:bg-blue-50 transition-all active:scale-95"
       >
         Agendar Consulta
@@ -249,7 +250,7 @@ const CONTACTO = (
             +51 926 798 464
           </a>
         </div>
-        <p className="text-xs text-slate-500">Disponible Lun–Sáb, 8:00 am – 7:00 pm</p>
+        <p className="text-xs text-slate-500">Lun–Vie: 8:00 am – 7:00 pm · Sáb: 8:00 am – 1:00 pm</p>
       </div>
 
       <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex flex-col gap-2">
@@ -313,7 +314,7 @@ const CONTACTO = (
         Reserva tu cita en línea en menos de 2 minutos, sin llamadas ni filas.
       </p>
       <a
-        href="https://fisiosystem-8c492.web.app/#/agendar"
+        href={BOOKING_URL}
         className="inline-block bg-white text-blue-600 font-bold text-sm px-8 py-3 rounded-full hover:bg-blue-50 transition-all shadow-lg hover:-translate-y-0.5 active:scale-95"
       >
         Agendar mi Cita Ahora
@@ -351,18 +352,20 @@ const INFO_CONFIG: Record<
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, type }) => {
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const { title, subtitle, icon, content } = INFO_CONFIG[type];
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') onClose();
-  };
-
   return (
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-      onKeyDown={handleKeyDown}
     >
       {/* Backdrop */}
       <div

@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { LoginType } from '../types';
+import { Activity } from 'lucide-react';
+import { BOOKING_URL, PORTAL_URL } from '../config';
 
-interface NavbarProps {
-  onLoginClick: (type: LoginType) => void;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
+const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -22,8 +19,8 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
     }`}>
       <div className="container mx-auto px-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-            F
+          <div className="bg-blue-600 p-2 rounded-2xl shadow-lg shadow-blue-200 flex items-center justify-center">
+            <Activity className="text-white" size={24} />
           </div>
           <span className={`text-xl font-bold ${scrolled ? 'text-slate-800' : 'text-slate-800'}`}>
             Fisioterapi Chepén <span className="text-red-500 text-3xl">❤️</span>
@@ -53,15 +50,15 @@ const Navbar: React.FC<NavbarProps> = ({ onLoginClick }) => {
 
           {/* PORTAL MÉDICO: Para el personal */}
           <a 
-            href="https://fisiosystem-8c492.web.app" 
+            href={PORTAL_URL}
             className="hidden sm:block text-slate-600 hover:text-blue-600 text-sm font-medium px-4 py-2 transition-colors"
           >
             Portal Médico
           </a>
 
-          {/* BOTÓN DE AGENDAR CITA: Ahora envía directo al sistema de reservas */}
+          {/* BOTÓN DE AGENDAR CITA */}
           <a 
-            href="https://fisiosystem-8c492.web.app/#/agendar"
+            href={BOOKING_URL}
             className="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition-all shadow-md active:scale-95 inline-block text-center"
           >
             Agendar Cita

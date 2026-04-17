@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Activity } from 'lucide-react';
 import { LegalType } from './LegalModal';
 import { InfoType } from './InfoModal';
 
@@ -19,7 +20,9 @@ const Footer: React.FC<FooterProps> = ({ onLegalClick, onInfoClick }) => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center space-x-2 mb-6">
-              <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold">F</div>
+              <div className="bg-blue-600 p-1.5 rounded-xl shadow-lg shadow-blue-900/40 flex items-center justify-center">
+                <Activity className="text-white" size={20} />
+              </div>
               <span className="text-white text-xl font-bold">Fisioterapi Chepén</span>
             </div>
             <p className="text-sm leading-relaxed">

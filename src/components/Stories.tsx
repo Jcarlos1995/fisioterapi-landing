@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { db } from '../firebaseConfig';
+import { dbSistema } from '../firebaseSistema';
 import { collection, getDocs, query } from 'firebase/firestore';
 import { HeartPulse, Loader2, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -43,11 +43,11 @@ const Stories: React.FC = () => {
   useEffect(() => {
     const fetchStories = async () => {
       try {
-        const q = query(collection(db, 'stories'));
+        const q = query(collection(dbSistema, 'stories'));
         const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => {
           const item = doc.data();
-          return { id: doc.id, ...item } as ClinicStory;
+          return { ...item, id: doc.id } as ClinicStory;
         });
         // Si Firebase devuelve historias, las usamos; si no, mostramos las por defecto
         setStories(data.length > 0 ? data : DEFAULT_STORIES);

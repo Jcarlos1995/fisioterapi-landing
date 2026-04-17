@@ -8,11 +8,15 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.firebase/
 dist
 dist-ssr
 *.local
 .env
 .env.local
+.env.example
+functions/.env
+functions/lib/
 
 # Editor directories and files
 .vscode/*

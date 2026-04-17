@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { BOOKING_URL } from '../config';
+import logoFisioterapia from '../assets/logo-fisioterapia.png';
 
 const Hero: React.FC = () => {
   return (
@@ -17,19 +19,29 @@ const Hero: React.FC = () => {
           </p>
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
             <a 
-                href="https://fisiosystem-8c492.web.app/#/agendar"
+                href={BOOKING_URL}
                 className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all transform hover:-translate-y-1 text-center inline-block" >
                   Reservar Cita
            </a>
           </div>
         </div>
       </div>
-      
-      {/* Abstract Background Element */}
-      <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1/2 h-full hidden lg:block opacity-10 pointer-events-none">
+
+      {/* Blob + Logo superpuesto */}
+      <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1/2 h-full hidden lg:flex items-center justify-center pointer-events-none">
+        {/* Blob de fondo */}
+        <div className="absolute inset-0 opacity-15">
         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
           <path fill="#2563EB" d="M44.7,-76.4C58.3,-69.2,70.1,-57.4,78.2,-43.3C86.3,-29.2,90.7,-12.7,89.5,3.4C88.3,19.4,81.5,35,71.5,48.2C61.5,61.4,48.3,72.2,33.4,78.5C18.5,84.7,1.8,86.4,-15.6,83.4C-33,80.4,-51,72.7,-64.4,60.2C-77.8,47.7,-86.6,30.4,-89.8,12.3C-93,-5.8,-90.6,-24.8,-82,-41.2C-73.4,-57.6,-58.6,-71.4,-42.6,-77.4C-26.6,-83.4,-9.4,-81.6,4.6,-89.6C18.6,-97.6,44.7,-76.4,44.7,-76.4Z" transform="translate(100 100)" />
         </svg>
+        </div>
+        {/* Logo encima del blob — mix-blend-mode:multiply elimina el blanco */}
+        <img
+          src={logoFisioterapia}
+          alt="Fisioterapia Chepén"
+          className="relative z-10"
+          style={{ mixBlendMode: 'multiply', width: '800px', height: '800px', objectFit: 'contain' }}
+        />
       </div>
     </div>
   );

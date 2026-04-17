@@ -1,38 +1,26 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { getClinicData } from "./databaseService"; 
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getClinicData, getLatestStory } from "./databaseService";
 
-const API_KEY = (import.meta as any).env.VITE_GEMINI_API_KEY;
-
-// Inicialización limpia
-const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
-
-export const getClinicalAssistantResponse = async (userQuery: string) => {
+export const getClinicalAssistantResponse = async (userQuery: string): Promise<string> => {
   try {
-    if (!genAI || !API_KEY) {
-      console.error("VITE_GEMINI_API_KEY no detectada.");
-      return "Lo siento, el asistente no está configurado correctamente.";
-    }
+    const [serviciosData, especialistasData, latestStory] = await Promise.all([
+      getClinicData('servicios'),
+      getClinicData('especialistas'),
+      getLatestStory(),
+    ]);
 
-    const serviciosData = await getClinicData('servicios');
-    const especialistasData = await getClinicData('especialistas');
-
-    const serviciosInfo = JSON.stringify(serviciosData);
+    const serviciosInfo     = JSON.stringify(serviciosData);
     const especialistasInfo = JSON.stringify(especialistasData);
 
-    // PARCHE APLICADO: Forzamos apiVersion: 'v1' para evitar el error v1beta
-    // Se mantiene el modelo gemini-1.5-flash solicitado
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash"
-    });
-    const chat = model.startChat({
-      history: [
-        {
-          role: "user",
-          parts: [{ text: "Hola" }],
-        },
-        {
-          role: "model",
-          parts: [{ text: `Eres el Asistente Virtual de "Fisioterapia Chepén". 
+    const storyBlock = latestStory
+      ? `CASO DE ÉXITO MÁS RECIENTE (extraído en tiempo real):
+            - Paciente: ${latestStory.patientName}
+            - Diagnóstico: ${latestStory.diagnosis}
+            - Testimonio: "${latestStory.testimony}"
+            Cuando te pregunten por casos de éxito o resultados, resume este caso en 3 líneas simples y naturales, sin tecnicismos.`
+      : `No hay casos de éxito registrados aún. Si preguntan, indica que los resultados hablan por sí solos y anima a agendar una cita.`;
+
+    const systemPrompt = `Eres el Asistente Virtual de "Fisioterapia Chepén".
             Tu objetivo es orientar a los pacientes de manera experta.
 
             DATOS EN TIEMPO REAL:
@@ -44,26 +32,32 @@ export const getClinicalAssistantResponse = async (userQuery: string) => {
             - DC. Juan Fuentes Loyola (Quiropráctica / Especialista)
             - FT. Edson Pineda Oliva, FT. Emely Salirrosas, FT. Ingrid Briones.
 
-            CASOS DE ÉXITO REALES:
-            - Segundo Vasquez: Recuperó el 90% de movilidad tras un ACV en 2 meses.
-            - Juan Celiz: Recuperó el 100% de movilidad tras paraplejia por hernia dorsal.
+            ${storyBlock}
 
             REGLAS DE ORO:
             1. Usa los precios y servicios exactos de los datos de Firebase.
-            2. Menciona los casos de éxito ante consultas de parálisis o ACV.
+            2. Ante preguntas sobre resultados o casos reales, usa el caso más reciente de arriba.
             3. Mantén un tono empático y profesional.
-            4. Invita siempre a "Reservar una Cita" para evaluación física.` }],
-        },
-      ],
-    });
+            4. Invita siempre a "Reservar una Cita" para evaluación física.`;
 
-    const result = await chat.sendMessage(userQuery);
-    const response = await result.response;
-    
-    return response.text() || "Lo siento, no pude procesar tu solicitud.";
+    const functions   = getFunctions(undefined, "us-central1");
+    const landingChat = httpsCallable<
+      { userQuery: string; systemPrompt: string },
+      { text: string }
+    >(functions, "landingChat");
 
-  } catch (error) {
-    console.error("Error detallado al conectar con Gemini:", error);
+    const result = await landingChat({ userQuery, systemPrompt });
+    return result.data.text;
+
+  } catch (error: unknown) {
+    console.error("Error al conectar con el asistente:", error);
+    const msg = String((error as { message?: string })?.message ?? "");
+    if (msg.includes("unavailable") || msg.includes("503")) {
+      return "El asistente está con alta demanda ahora mismo. Espera unos segundos e intenta de nuevo.";
+    }
+    if (msg.includes("resource-exhausted") || msg.includes("429")) {
+      return "Se alcanzó el límite de consultas por ahora. Intenta de nuevo en unos minutos.";
+    }
     return "Estamos experimentando dificultades técnicas. Por favor, intenta de nuevo más tarde.";
   }
 };

@@ -289,19 +289,20 @@ const LEGAL_CONFIG: Record<
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, type }) => {
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const { title, subtitle, icon, content } = LEGAL_CONFIG[type];
 
-  // Cierra con Escape
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') onClose();
-  };
-
   return (
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-      onKeyDown={handleKeyDown}
     >
       {/* Backdrop */}
       <div

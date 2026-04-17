@@ -1,38 +1,21 @@
 import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-// Importamos el componente Stories que tiene la lógica de Firebase y Carrusel
 import Stories from './components/Stories';
 import Professionals from './components/Professionals';
 import Footer from './components/Footer';
-import LoginModal from './components/LoginModal';
 import LegalModal, { LegalType } from './components/LegalModal';
 import InfoModal, { InfoType } from './components/InfoModal';
 import { ChatAssistant } from './components/ChatAssistant';
-import { LoginType } from './types';
+import { BOOKING_URL } from './config';
 
 const App: React.FC = () => {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [selectedLoginType, setSelectedLoginType] = useState<LoginType>(LoginType.CLIENT);
-
-  // Estado del modal legal
   const [legalModalType, setLegalModalType] = useState<LegalType | null>(null);
-
-  // Estado del modal informativo
   const [infoModalType, setInfoModalType] = useState<InfoType | null>(null);
-
-  // URL del sistema de agendamiento
-  const BOOKING_URL = "https://fisiosystem-8c492.web.app/#/agendar";
-
-  const openLogin = (type: LoginType) => {
-    setSelectedLoginType(type);
-    setIsLoginModalOpen(true);
-  };
 
   return (
     <div className="min-h-screen flex flex-col scroll-smooth">
-      {/* El Navbar ahora maneja el enlace directo a agendar */}
-      <Navbar onLoginClick={openLogin} />
+      <Navbar />
 
       <main className="flex-grow">
         <Hero />
@@ -80,12 +63,6 @@ const App: React.FC = () => {
       <Footer
         onLegalClick={(type) => setLegalModalType(type)}
         onInfoClick={(type) => setInfoModalType(type)}
-      />
-
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        type={selectedLoginType}
       />
 
       {/* Modal Legal */}

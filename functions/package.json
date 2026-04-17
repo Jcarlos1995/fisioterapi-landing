@@ -1,0 +1,17 @@
+{
+  "name": "fisioterapi-landing-functions",
+  "scripts": {
+    "build": "tsc"
+  },
+  "engines": { "node": "20" },
+  "main": "lib/index.js",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "private": true
+}
