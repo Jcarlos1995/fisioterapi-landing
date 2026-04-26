@@ -1,2 +1,3 @@
 export const BOOKING_URL = 'https://fisiosystem-8c492.web.app/#/agendar';
-export const PORTAL_URL  = 'https://fisiosystem-8c492.web.app/#/portal';
+export const PORTAL_URL  = 'https://fisiosystem-8c492.web.app';
+export const PATIENT_PORTAL_URL = 'https://fisiosystem-8c492.web.app/#/portal';
