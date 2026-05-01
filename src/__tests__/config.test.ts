@@ -7,12 +7,12 @@ import { BOOKING_URL, PORTAL_URL, PATIENT_PORTAL_URL } from '../config';
 
 describe('URLs de configuración', () => {
   it('BOOKING_URL apunta al sistema correcto', () => {
-    expect(BOOKING_URL).toContain('fisiosystem-8c492.web.app');
+    expect(BOOKING_URL).toContain('sistema.fisioterapichepen.com');
     expect(BOOKING_URL).toContain('#/agendar');
   });
 
   it('PORTAL_URL apunta al portal de pacientes', () => {
-    expect(PORTAL_URL).toContain('fisiosystem-8c492.web.app');
+    expect(PORTAL_URL).toContain('sistema.fisioterapichepen.com');
   });
 
   it('PATIENT_PORTAL_URL incluye el hash del portal', () => {
