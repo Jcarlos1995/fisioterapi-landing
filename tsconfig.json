@@ -24,6 +24,9 @@
       ]
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
-  }
+    "noEmit": true,
+    "types": ["node", "vitest/globals"]
+  },
+  "include": ["src"],
+  "exclude": ["functions", "node_modules", "dist"]
 }
