@@ -5,7 +5,7 @@ import { collection, getDocs } from 'firebase/firestore';
 // Foto de placeholder mientras no haya photoUrl en Firestore.
 // Para agregar fotos reales: sube la imagen a Firebase Storage y guarda
 // la URL en el campo `photoUrl` del documento en la colección `especialistas`.
-const PLACEHOLDER = 'https://via.placeholder.com/400x500?text=Foto+Próximamente';
+const PLACEHOLDER = 'https://placehold.co/400x500?text=Foto+Pr%C3%B3ximamente';
 
 // Mapa de clave → imagen local (photoKey). Las fotos locales del equipo
 // se sirven desde Firebase Storage vía el campo `photoUrl` en Firestore.
