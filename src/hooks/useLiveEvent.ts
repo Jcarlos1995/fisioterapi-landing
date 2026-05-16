@@ -4,13 +4,16 @@ import { doc, onSnapshot } from 'firebase/firestore';
 // El EventsManager del panel escribe en esa misma base → una sola fuente de verdad.
 import { dbSistema } from '../firebaseSistema';
 
+export type LiveEventMode = 'embed' | 'redirect';
+
 export interface LiveEvent {
   active: boolean;
-  facebookUrl: string;
+  facebookUrl: string;        // URL del directo (no es exclusiva de Facebook)
   title: string;
+  mode: LiveEventMode;        // 'embed' = abre modal · 'redirect' = abre en nueva pestaña
 }
 
-const DEFAULT: LiveEvent = { active: false, facebookUrl: '', title: '' };
+const DEFAULT: LiveEvent = { active: false, facebookUrl: '', title: '', mode: 'embed' };
 
 export const useLiveEvent = (): LiveEvent => {
   const [event, setEvent] = useState<LiveEvent>(DEFAULT);
@@ -25,6 +28,7 @@ export const useLiveEvent = (): LiveEvent => {
             active:      Boolean(data.active),
             facebookUrl: String(data.facebookUrl ?? ''),
             title:       String(data.title ?? 'Evento en Vivo'),
+            mode:        (data.mode === 'redirect' ? 'redirect' : 'embed') as LiveEventMode,
           });
         } else {
           setEvent(DEFAULT);

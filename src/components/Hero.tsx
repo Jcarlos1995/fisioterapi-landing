@@ -1,14 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Radio, Clock } from 'lucide-react';
+import { X, Radio, Clock, ExternalLink } from 'lucide-react';
 import { BOOKING_URL } from '../config';
 import { useLiveEvent } from '../hooks/useLiveEvent';
 import logoFisioterapia from '../assets/logo-fisioterapia.png';
 
 const COUNTDOWN_SECONDS = 30;
 
-// Convierte una URL de Facebook a la URL de embed del plugin de video
-function toFacebookEmbedUrl(url: string): string {
-  return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&width=720&height=405&autoplay=true`;
+// Detecta la plataforma y construye la URL embebible adecuada.
+// Soporta Facebook y YouTube (live + videos). Para cualquier otro link,
+// el panel debería usar modo "redirect" para abrir en nueva pestaña.
+function toEmbedUrl(url: string): { embedUrl: string; supported: boolean } {
+  // YouTube: watch?v=ID · live/ID · embed/ID · youtu.be/ID
+  const ytMatch = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|live\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  if (ytMatch) {
+    return {
+      embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`,
+      supported: true,
+    };
+  }
+
+  // Facebook (videos y directos de páginas públicas)
+  if (url.includes('facebook.com') || url.includes('fb.watch')) {
+    return {
+      embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&width=720&height=405&autoplay=true`,
+      supported: true,
+    };
+  }
+
+  return { embedUrl: '', supported: false };
 }
 
 const Hero: React.FC = () => {
@@ -84,17 +105,18 @@ const Hero: React.FC = () => {
               {/* ================================================================
                   BOTÓN DE EVENTO EN VIVO (sorteos, transmisiones, clases)
                   ================================================================
-                  Controlado desde Firestore: fisiochepen-oficial
-                  Colección: config  →  Documento: liveEvent
+                  Controlado desde el panel: módulo "Eventos" (solo TI).
+                  Firestore: fisiosystem-8c492  →  config/liveEvent
                   Campos:
                     active      (boolean) — true muestra el botón, false lo oculta
-                    facebookUrl (string)  — URL del video/directo de Facebook
+                    facebookUrl (string)  — URL del directo (Facebook, YouTube, etc.)
                     title       (string)  — Texto del encabezado del modal
+                    mode        ('embed' | 'redirect')
+                                  embed    → abre modal con iframe (Facebook/YouTube)
+                                  redirect → abre el link en nueva pestaña (TikTok, IG…)
                   Hook: src/hooks/useLiveEvent.ts
-                  Para activar un evento: cambia active=true y pega la URL.
-                  Para desactivarlo: cambia active=false. Sin deploy.
                   ================================================================ */}
-              {liveEvent.active && (
+              {liveEvent.active && liveEvent.mode === 'embed' && (
                 <button
                   onClick={() => setShowModal(true)}
                   className="relative flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl shadow-red-200 transition-all transform hover:-translate-y-1 overflow-hidden"
@@ -102,8 +124,23 @@ const Hero: React.FC = () => {
                   {/* Pulso de fondo animado */}
                   <span className="absolute inset-0 rounded-xl bg-red-500 animate-ping opacity-30 pointer-events-none" />
                   <Radio size={20} className="flex-shrink-0" />
-                  Ver sorteo en vivo
+                  Ver evento en vivo
                 </button>
+              )}
+
+              {liveEvent.active && liveEvent.mode === 'redirect' && liveEvent.facebookUrl && (
+                <a
+                  href={liveEvent.facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl shadow-red-200 transition-all transform hover:-translate-y-1 overflow-hidden"
+                >
+                  {/* Pulso de fondo animado */}
+                  <span className="absolute inset-0 rounded-xl bg-red-500 animate-ping opacity-30 pointer-events-none" />
+                  <Radio size={20} className="flex-shrink-0 relative" />
+                  <span className="relative">ESTAMOS EN VIVO</span>
+                  <ExternalLink size={16} className="flex-shrink-0 relative opacity-80" />
+                </a>
               )}
             </div>
           </div>
@@ -165,22 +202,43 @@ const Hero: React.FC = () => {
               </button>
             </div>
 
-            {/* Embed de Facebook Live */}
+            {/* Embed multiplataforma (Facebook / YouTube) */}
             <div className="w-full bg-black" style={{ aspectRatio: '16/9' }}>
-              {liveEvent.facebookUrl ? (
-                <iframe
-                  src={toFacebookEmbedUrl(liveEvent.facebookUrl)}
-                  className="w-full h-full"
-                  style={{ border: 'none', minHeight: '405px' }}
-                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                  allowFullScreen
-                  title="En Vivo — Fisioterapi Chepén"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-white/50 text-sm min-h-[300px]">
-                  Cargando transmisión...
-                </div>
-              )}
+              {(() => {
+                if (!liveEvent.facebookUrl) {
+                  return (
+                    <div className="w-full h-full flex items-center justify-center text-white/50 text-sm min-h-[300px]">
+                      Cargando transmisión...
+                    </div>
+                  );
+                }
+                const { embedUrl, supported } = toEmbedUrl(liveEvent.facebookUrl);
+                if (!supported) {
+                  return (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-white/80 gap-3 px-6 text-center min-h-[300px]">
+                      <p className="text-sm">Esta plataforma no permite embed.</p>
+                      <a
+                        href={liveEvent.facebookUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg font-semibold text-sm"
+                      >
+                        Abrir transmisión <ExternalLink size={14} />
+                      </a>
+                    </div>
+                  );
+                }
+                return (
+                  <iframe
+                    src={embedUrl}
+                    className="w-full h-full"
+                    style={{ border: 'none', minHeight: '405px' }}
+                    allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                    allowFullScreen
+                    title="En Vivo — Fisioterapi Chepén"
+                  />
+                );
+              })()}
             </div>
 
             {/* Footer */}
