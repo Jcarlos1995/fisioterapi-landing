@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+// Lee desde fisiosystem-8c492 (proyecto del panel interno).
+// El EventsManager del panel escribe en esa misma base → una sola fuente de verdad.
+import { dbSistema } from '../firebaseSistema';
 
 export interface LiveEvent {
   active: boolean;
@@ -15,7 +17,7 @@ export const useLiveEvent = (): LiveEvent => {
 
   useEffect(() => {
     const unsub = onSnapshot(
-      doc(db, 'config', 'liveEvent'),
+      doc(dbSistema, 'config', 'liveEvent'),
       (snap) => {
         if (snap.exists()) {
           const data = snap.data();

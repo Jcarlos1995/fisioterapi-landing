@@ -1,35 +1,82 @@
-import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onRequest } from "firebase-functions/v2/https";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-/**
- * Proxy público para el chat de la landing.
- * La clave API vive en el servidor (functions/.env).
- * No requiere autenticación porque la landing es pública.
- *
- * Request:  { userQuery: string, systemPrompt: string }
- * Response: { text: string }
- */
-export const landingChat = onCall(
-  {
-    region:         "us-central1",
-    timeoutSeconds: 60,
-    cors:           ["https://fisiochepen-oficial.web.app", "http://localhost:3000"],
-  },
-  async (request) => {
+interface ClinicData {
+  servicios?:     unknown[];
+  especialistas?: unknown[];
+  story?: {
+    patientName: string;
+    diagnosis:   string;
+    testimony:   string;
+  } | null;
+}
+
+// Limita longitud y elimina secuencias que podrían inyectar instrucciones al modelo
+const sanitize = (value: unknown, maxLength = 400): string => {
+  if (typeof value !== "string") return "";
+  return value.slice(0, maxLength).replace(/\n{3,}/g, "\n\n");
+};
+
+const buildSystemPrompt = (clinicData: ClinicData): string => {
+  const serviciosStr    = JSON.stringify(clinicData.servicios    ?? []).slice(0, 1200);
+  const especialistasStr = JSON.stringify(clinicData.especialistas ?? []).slice(0, 1200);
+
+  const storyBlock = clinicData.story
+    ? `CASO DE ÉXITO MÁS RECIENTE:
+- Paciente: ${sanitize(clinicData.story.patientName, 80)}
+- Diagnóstico: ${sanitize(clinicData.story.diagnosis, 120)}
+- Testimonio: "${sanitize(clinicData.story.testimony, 400)}"
+Cuando pregunten por casos de éxito, resume este caso en 3 líneas simples y naturales, sin tecnicismos.`
+    : `No hay casos de éxito registrados aún. Si preguntan, indica que los resultados hablan por sí solos y anima a agendar una cita.`;
+
+  return `Eres el Asistente Virtual de "Fisioterapia Chepén".
+Tu objetivo es orientar a los pacientes de manera experta.
+
+DATOS EN TIEMPO REAL:
+- Servicios y Precios: ${serviciosStr}
+- Información de Staff: ${especialistasStr}
+
+ESPECIALISTAS PRINCIPALES:
+- Lic. Silvia Fuentes Romero (Directora / Especialista Senior)
+- DC. Juan Fuentes Loyola (Quiropráctica / Especialista)
+- FT. Edson Pineda Oliva, FT. Emely Salirrosas, FT. Ingrid Briones.
+
+${storyBlock}
+
+REGLAS DE ORO:
+1. Usa los precios y servicios exactos de los datos de Firebase.
+2. Ante preguntas sobre resultados o casos reales, usa el caso más reciente de arriba.
+3. Mantén un tono empático y profesional.
+4. Invita siempre a "Reservar una Cita" para evaluación física.`;
+};
+
+export const landingChat = onRequest(
+  { region: "us-central1", timeoutSeconds: 60 },
+  async (req, res) => {
+    // ── CORS explícito ────────────────────────────────────────────────────────
+    res.set("Access-Control-Allow-Origin",  "*");
+    res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.set("Access-Control-Allow-Headers", "Content-Type");
+
+    if (req.method === "OPTIONS") { res.status(204).end(); return; }
+
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      throw new HttpsError("internal", "Clave Gemini no configurada en el servidor.");
+      res.status(500).json({ error: "Clave Gemini no configurada en el servidor." });
+      return;
     }
 
-    const { userQuery, systemPrompt } = request.data as {
-      userQuery:    string;
-      systemPrompt: string;
+    const { userQuery, clinicData } = req.body as {
+      userQuery:  string;
+      clinicData: ClinicData;
     };
 
     if (!userQuery || typeof userQuery !== "string" || userQuery.trim().length === 0) {
-      throw new HttpsError("invalid-argument", "El campo 'userQuery' es requerido.");
+      res.status(400).json({ error: "El campo 'userQuery' es requerido." });
+      return;
     }
 
+    const systemPrompt = buildSystemPrompt(clinicData ?? {});
     let lastError: unknown;
 
     for (let attempt = 1; attempt <= 3; attempt++) {
@@ -43,13 +90,14 @@ export const landingChat = onCall(
           ],
         });
         const result = await chat.sendMessage(userQuery);
-        return { text: result.response.text() || "Lo siento, no pude procesar tu solicitud." };
+        res.json({ text: result.response.text() || "Lo siento, no pude procesar tu solicitud." });
+        return;
       } catch (err: unknown) {
         lastError = err;
         const msg = String((err as { message?: string })?.message ?? "");
         const isTransient = msg.includes("503") || msg.includes("429");
         if (isTransient && attempt < 3) {
-          await new Promise((res) => setTimeout(res, attempt * 2000));
+          await new Promise((r) => setTimeout(r, attempt * 2000));
           continue;
         }
         break;
@@ -58,10 +106,10 @@ export const landingChat = onCall(
 
     const errorMsg = String((lastError as { message?: string })?.message ?? "");
     if (errorMsg.includes("503"))
-      throw new HttpsError("unavailable", "El asistente está con alta demanda. Espera unos segundos e intenta de nuevo.");
-    if (errorMsg.includes("429"))
-      throw new HttpsError("resource-exhausted", "Se alcanzó el límite de consultas. Intenta en unos minutos.");
-
-    throw new HttpsError("internal", "Dificultades técnicas. Por favor intenta de nuevo más tarde.");
+      res.status(503).json({ error: "El asistente está con alta demanda. Espera unos segundos e intenta de nuevo." });
+    else if (errorMsg.includes("429"))
+      res.status(429).json({ error: "Se alcanzó el límite de consultas. Intenta en unos minutos." });
+    else
+      res.status(500).json({ error: "Dificultades técnicas. Por favor intenta de nuevo más tarde." });
   }
 );
