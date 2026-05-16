@@ -2,16 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, getDocs } from 'firebase/firestore';
 
-// Foto de placeholder mientras no haya photoUrl en Firestore.
-// Para agregar fotos reales: sube la imagen a Firebase Storage y guarda
-// la URL en el campo `photoUrl` del documento en la colección `especialistas`.
-const PLACEHOLDER = 'https://placehold.co/400x500?text=Foto+Pr%C3%B3ximamente';
+import fotoSilvia from '../assets/team/silvia.jpg';
+import fotoJuan   from '../assets/team/juan.jpg';
+import fotoEdson  from '../assets/team/edson.jpg';
+import fotoEmely  from '../assets/team/emely.jpg';
+import fotoIngrid from '../assets/team/ingrid.jpg';
 
-// Mapa de clave → imagen local (photoKey). Las fotos locales del equipo
-// se sirven desde Firebase Storage vía el campo `photoUrl` en Firestore.
-// Si necesitas añadir una imagen local, colócala en src/assets/team/ y
-// agrégala aquí. Por ahora usan el campo photoUrl de Firestore como fuente.
-const LOCAL_PHOTOS: Record<string, string> = {};
+// Mapa de clave → imagen local. Si un doc de Firestore tiene photoKey: "silvia",
+// se usa fotoSilvia automáticamente. Si tiene photoUrl, esa tiene prioridad.
+const LOCAL_PHOTOS: Record<string, string> = {
+  silvia: fotoSilvia,
+  juan:   fotoJuan,
+  edson:  fotoEdson,
+  emely:  fotoEmely,
+  ingrid: fotoIngrid,
+};
+
+const PLACEHOLDER = 'https://placehold.co/400x500?text=Foto+Pr%C3%B3ximamente';
 
 interface StaffMember {
   id:        string;
@@ -22,11 +29,11 @@ interface StaffMember {
 }
 
 const STAFF_FALLBACK: StaffMember[] = [
-  { id: '1', name: 'Lic. Silvia Fuentes Romero',   specialty: 'Directora - Rehabilitación Física', image: PLACEHOLDER, bio: 'Especialista senior con amplia trayectoria en la dirección clínica y rehabilitación integral.' },
-  { id: '2', name: 'DC. Juan Fuentes Loyola',       specialty: 'Doctor en Quiropráctica',           image: PLACEHOLDER, bio: 'Experto en alineación de columna y tratamiento de dolencias neuromusculoesqueléticas.' },
-  { id: '3', name: 'FT. Edson Pineda Oliva',        specialty: 'Fisioterapia y Rehabilitación',     image: PLACEHOLDER, bio: 'Especialista en terapia física aplicada a la recuperación de lesiones musculares.' },
-  { id: '4', name: 'FT. Emely Salirrosas Serrano',  specialty: 'Fisioterapia y Rehabilitación',     image: PLACEHOLDER, bio: 'Dedicada a la recuperación funcional y bienestar preventivo de los pacientes.' },
-  { id: '5', name: 'FT. Ingrid Briones Serrano',    specialty: 'Fisioterapia y Rehabilitación',     image: PLACEHOLDER, bio: 'Especialista en técnicas modernas de fisioterapia para el manejo del dolor.' },
+  { id: '1', name: 'Lic. Silvia Fuentes Romero',   specialty: 'Directora - Rehabilitación Física', image: fotoSilvia, bio: 'Especialista senior con amplia trayectoria en la dirección clínica y rehabilitación integral.' },
+  { id: '2', name: 'DC. Juan Fuentes Loyola',       specialty: 'Doctor en Quiropráctica',           image: fotoJuan,   bio: 'Experto en alineación de columna y tratamiento de dolencias neuromusculoesqueléticas.' },
+  { id: '3', name: 'FT. Edson Pineda Oliva',        specialty: 'Fisioterapia y Rehabilitación',     image: fotoEdson,  bio: 'Especialista en terapia física aplicada a la recuperación de lesiones musculares.' },
+  { id: '4', name: 'FT. Emely Salirrosas Serrano',  specialty: 'Fisioterapia y Rehabilitación',     image: fotoEmely,  bio: 'Dedicada a la recuperación funcional y bienestar preventivo de los pacientes.' },
+  { id: '5', name: 'FT. Ingrid Briones Serrano',    specialty: 'Fisioterapia y Rehabilitación',     image: fotoIngrid, bio: 'Especialista en técnicas modernas de fisioterapia para el manejo del dolor.' },
 ];
 
 const Professionals: React.FC = () => {
