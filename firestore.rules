@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Datos de la clínica: solo lectura pública (la landing los muestra)
+    match /servicios/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /especialistas/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Configuración de eventos en vivo (sorteos, transmisiones): lectura pública, escritura solo desde consola Firebase
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Todo lo demás: denegar
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
