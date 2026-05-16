@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 // Lee desde fisiosystem-8c492 (proyecto del panel interno).
 // El EventsManager del panel escribe en esa misma base → una sola fuente de verdad.
-import { dbSistema } from '../firebaseSistema';
+import { dbSistema } from '../lib/firebaseSistema';
 
 export type LiveEventMode = 'embed' | 'redirect';
 

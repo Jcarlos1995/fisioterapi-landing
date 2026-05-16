@@ -1,6 +1,6 @@
 // src/services/databaseService.ts de la WEB
-import { db } from '../firebaseConfig';
-import { dbSistema } from '../firebaseSistema';
+import { db } from '../lib/firebase';
+import { dbSistema } from '../lib/firebaseSistema';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 
 export const getClinicData = async (collectionName: string) => {

@@ -1,5 +1,6 @@
-// Instancia secundaria de Firebase apuntando a fisiosystem-8c492
-// Solo se usa para leer la colección 'stories' gestionada desde el panel
+// Segunda instancia de Firebase apuntando a fisiosystem-8c492 (proyecto del panel).
+// Se usa para leer 'stories' y 'config/liveEvent' gestionados desde el panel interno.
+// Si en el futuro el landing necesita más datos del sistema, usar esta misma instancia.
 import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 

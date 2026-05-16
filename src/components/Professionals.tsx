@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebaseConfig';
+import { db } from '../lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 
 import fotoSilvia from '../assets/team/silvia.jpg';

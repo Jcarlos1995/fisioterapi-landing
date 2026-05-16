@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { dbSistema } from '../firebaseSistema';
+import { dbSistema } from '../lib/firebaseSistema';
 import { collection, getDocs, query } from 'firebase/firestore';
 import { HeartPulse, Loader2, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 
