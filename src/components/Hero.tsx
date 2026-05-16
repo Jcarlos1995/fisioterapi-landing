@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { X, Radio } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Radio, Clock } from 'lucide-react';
 import { BOOKING_URL } from '../config';
 import { useLiveEvent } from '../hooks/useLiveEvent';
 import logoFisioterapia from '../assets/logo-fisioterapia.png';
+
+const COUNTDOWN_SECONDS = 30;
 
 // Convierte una URL de Facebook a la URL de embed del plugin de video
 function toFacebookEmbedUrl(url: string): string {
@@ -11,7 +13,49 @@ function toFacebookEmbedUrl(url: string): string {
 
 const Hero: React.FC = () => {
   const liveEvent  = useLiveEvent();
-  const [showModal, setShowModal] = useState(false);
+  const [showModal,  setShowModal]  = useState(false);
+  // null = sin cuenta atrás · número = segundos restantes
+  const [countdown, setCountdown]   = useState<number | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const closeModal = () => {
+    setShowModal(false);
+    setCountdown(null);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  };
+
+  // Cuando el evento se desactiva desde el panel y el modal está abierto,
+  // arranca la cuenta atrás de COUNTDOWN_SECONDS segundos y luego cierra.
+  useEffect(() => {
+    if (!liveEvent.active && showModal && countdown === null) {
+      setCountdown(COUNTDOWN_SECONDS);
+      intervalRef.current = setInterval(() => {
+        setCountdown(prev => {
+          if (prev === null || prev <= 1) {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            setShowModal(false);
+            return null;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    // Si vuelven a activar el evento antes de que termine, cancela el countdown
+    if (liveEvent.active && countdown !== null) {
+      setCountdown(null);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    }
+
+    return () => {
+      // Limpieza al desmontar
+    };
+  }, [liveEvent.active, showModal]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Limpia el intervalo al desmontar el componente
+  useEffect(() => {
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, []);
 
   return (
     <>
@@ -85,12 +129,23 @@ const Hero: React.FC = () => {
       {showModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-          onClick={() => setShowModal(false)}
+          onClick={closeModal}
         >
           <div
             className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Banner de cuenta atrás — aparece cuando el admin desactiva el evento */}
+            {countdown !== null && (
+              <div className="flex items-center justify-center gap-2 bg-amber-500 text-white px-6 py-2.5 text-sm font-semibold">
+                <Clock size={15} className="shrink-0" />
+                <span>El evento ha finalizado. Este modal se cerrará en</span>
+                <span className="bg-white text-amber-600 font-bold rounded-full px-2 py-0.5 text-xs tabular-nums min-w-[28px] text-center">
+                  {countdown}s
+                </span>
+              </div>
+            )}
+
             {/* Cabecera */}
             <div className="flex items-center justify-between bg-red-600 px-6 py-4">
               <div className="flex items-center gap-3 text-white">
@@ -103,7 +158,7 @@ const Hero: React.FC = () => {
                 </span>
               </div>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={closeModal}
                 className="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-white/20"
               >
                 <X size={22} />
@@ -130,7 +185,7 @@ const Hero: React.FC = () => {
 
             {/* Footer */}
             <div className="px-6 py-3 bg-slate-50 text-center text-xs text-slate-400">
-              Transmisión en vivo por Facebook · Fisioterapi Chepén
+              Transmisión en vivo · Fisioterapi Chepén
             </div>
           </div>
         </div>
